@@ -4,8 +4,458 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RHODES ISLAND HR</title>
-    <!-- CSSの読み込み -->
-    <link rel="stylesheet" href="css/akunai.css">
+    <style>
+        /* =========================================
+           CSSスタイル (デザイン定義)
+           ========================================= */
+        
+        /* --- 全体設定 --- */
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(#2a2a2a 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* --- ヘッダー --- */
+        .main-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .main-header h1 {
+            display: inline-block;
+            border-bottom: 3px solid #ffd700;
+            padding-bottom: 10px;
+            letter-spacing: 0.1em;
+            color: #fff;
+        }
+
+        /* --- 一覧ページ用 --- */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        /* カードと削除ボタンをまとめる枠 */
+        .character-card-wrapper {
+            width: 300px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* リンク */
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+            width: 100%;
+            display: block;
+        }
+
+        .character-card {
+            background: #252525;
+            border: 1px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .character-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border-color: #ffd700;
+        }
+
+        .card-image-wrapper {
+            position: relative;
+            height: 350px;
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+        }
+
+        /* 画像がない場合のダミー表示 */
+        .no-image-text {
+            color: #555;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .rarity-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ffd700;
+            color: #000;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        .card-info {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .card-name {
+            margin: 0 0 10px 0;
+            font-size: 1.4em;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+            color: #fff;
+        }
+
+        .spec-tag {
+            background: #333;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            color: #bbb;
+        }
+
+        /* 削除ボタン */
+        .delete-btn {
+            margin-top: 8px;
+            background: #444;
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+        .delete-btn:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        /* 新規追加ボタン */
+        .add-button-area {
+            width: 100%;
+            text-align: center;
+            margin-top: 50px;
+            padding-bottom: 50px;
+        }
+        .add-btn {
+            display: inline-block;
+            background: #ffd700;
+            color: #000;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            transition: 0.2s;
+        }
+        .add-btn:hover {
+            background: #fff;
+            transform: scale(1.05);
+        }
+
+        /* --- 詳細ページ用 --- */
+        .detail-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .nav-area {
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: transparent;
+            color: #aaa;
+            border: 1px solid #aaa;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: 0.2s;
+        }
+        .back-btn:hover {
+            background: #aaa;
+            color: #000;
+        }
+
+        .detail-card {
+            background: rgba(30, 30, 30, 0.95);
+            border: 1px solid #555;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.8);
+            display: flex;
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+            border-radius: 8px;
+        }
+
+        .yellow-line {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: #ffd700;
+            z-index: 10;
+        }
+
+        .left-column {
+            width: 40%;
+            border-right: 1px solid #444;
+            padding: 30px;
+            background: #222;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .detail-title {
+            font-size: 2em;
+            margin: 0 0 20px 0;
+            letter-spacing: 0.1em;
+            color: #fff;
+            text-align: center;
+        }
+
+        .detail-image-box {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 2px solid #444;
+            background: #000;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-image {
+            width: 100%;
+            display: block;
+        }
+
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .spec-table th {
+            text-align: left;
+            color: #888;
+            padding: 8px 0;
+            border-bottom: 1px solid #444;
+            font-size: 0.9em;
+        }
+        .spec-table td {
+            text-align: right;
+            font-weight: bold;
+            padding: 8px 0;
+            border-bottom: 1px solid #444;
+            color: #ddd;
+        }
+
+        .right-column {
+            width: 60%;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .text-block h3 {
+            color: #ccc;
+            border-left: 4px solid #888;
+            padding-left: 10px;
+            margin-bottom: 15px;
+        }
+
+        .text-block p {
+            line-height: 1.8;
+            color: #ddd;
+            font-size: 0.95em;
+            text-align: justify;
+            white-space: pre-wrap; /* 改行を反映 */
+        }
+
+        .comment-block h3 {
+            border-left-color: #00bfff;
+            color: #00bfff;
+        }
+
+        .comment-box {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 6px;
+            font-style: italic;
+        }
+
+        .edit-area {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            text-align: right;
+        }
+
+        /* 編集ボタンのデザイン */
+        .edit-btn {
+            display: inline-block;
+            position: relative;
+            padding: 10px 30px;
+            color: #00bfff;
+            background: transparent;
+            border: 2px solid #00bfff;
+            font-weight: bold;
+            text-decoration: none;
+            letter-spacing: 0.1em;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+
+        .edit-btn:hover {
+            color: #000;
+            background: #00bfff;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+        }
+
+        .footer-sign {
+            text-align: right;
+            font-family: monospace;
+            color: #555;
+            font-size: 0.8em;
+            margin-top: 30px;
+        }
+
+        /* --- フォーム画面用 --- */
+        .form-container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: rgba(37, 37, 37, 0.95);
+            padding: 40px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #ffd700;
+        }
+
+        .form-title {
+            color: #fff;
+            border-bottom: 2px solid #555;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffd700;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 0;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #ffd700;
+            outline: none;
+            background-color: #000;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .button-area {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #444;
+            padding-top: 20px;
+        }
+
+        .submit-btn {
+            background: #ffd700;
+            color: #000;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%);
+            padding-left: 50px;
+        }
+        .submit-btn:hover {
+            background: #fff;
+            transform: translateX(5px);
+        }
+
+        .cancel-btn {
+            background: transparent;
+            color: #888;
+            border: 1px solid transparent;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        .cancel-btn:hover {
+            color: #fff;
+            border-color: #555;
+        }
+
+        /* スマホ対応 */
+        @media (max-width: 768px) {
+            .detail-card { flex-direction: column; }
+            .left-column, .right-column { width: 100%; border: none; }
+            .form-row { flex-direction: column; gap: 0; }
+        }
+    </style>
 </head>
 <body>
 
@@ -16,7 +466,7 @@
         </header>
 
         <div class="container" id="character-list">
-            <!-- ここにJavaScriptでキャラクターカードが生成されます -->
+            <!-- JavaScriptでここにカードが描画されます -->
         </div>
 
         <div class="add-button-area">
@@ -26,23 +476,20 @@
         </div>
     </section>
 
-    <!-- ▼ 2. 詳細画面セクション (初期状態は非表示) ▼ -->
+    <!-- ▼ 2. 詳細画面セクション ▼ -->
     <section id="detail-view" style="display: none;">
         <div class="detail-container">
-            
             <div class="nav-area">
                 <button onclick="showListView()" class="back-btn">◀ TERMINAL</button>
             </div>
-
             <div class="detail-card">
                 <div class="yellow-line"></div>
-
                 <div class="left-column">
                     <h1 class="detail-title" id="detail-codename"></h1>
                     <div class="detail-image-box">
-                        <img id="detail-image" src="" alt="" class="detail-image">
+                        <img id="detail-image" src="" alt="" class="detail-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                        <div class="no-image-text" style="display:none; color:#888;">NO IMAGE</div>
                     </div>
-                    
                     <table class="spec-table">
                         <tr><th>RARITY</th><td id="detail-star"></td></tr>
                         <tr><th>CLASS</th><td><span id="detail-job"></span> (<span id="detail-job2"></span>)</td></tr>
@@ -50,27 +497,22 @@
                         <tr><th>CV</th><td id="detail-cv"></td></tr>
                     </table>
                 </div>
-
                 <div class="right-column">
                     <div class="text-block">
                         <h3>PERSONAL HISTORY</h3>
                         <p id="detail-history"></p>
                     </div>
-                    
                     <div class="text-block comment-block">
                         <h3>DOCTOR'S COMMENT</h3>
                         <div class="comment-box">
                             <p id="detail-comment"></p>
                         </div>
                     </div>
-
                     <div class="edit-area">
-                        <!-- 編集ボタン -->
                         <button id="edit-btn-link" class="edit-btn">
                             <span class="icon">✎</span> EDIT DATA
                         </button>
                     </div>
-
                     <div class="footer-sign">
                         RHODES ISLAND TERMINAL // AUTH: DOCTOR
                     </div>
@@ -79,18 +521,17 @@
         </div>
     </section>
 
-    <!-- ▼ 3. 作成・編集フォームセクション (初期状態は非表示) ▼ -->
+    <!-- ▼ 3. フォームセクション（作成・編集兼用） ▼ -->
     <section id="form-view" style="display: none;">
         <header class="main-header">
             <h1 id="form-header-title">OPERATOR REGISTRATION</h1>
         </header>
-
         <div class="form-container">
             <h2 class="form-title" id="form-title">新規登録</h2>
             
             <form id="operator-form" onsubmit="handleFormSubmit(event)">
-                <input type="hidden" id="form-mode" value="create"> <!-- create か edit か -->
-                <input type="hidden" id="form-id" value=""> <!-- 編集時のID -->
+                <input type="hidden" id="form-mode" value="create">
+                <input type="hidden" id="form-id" value="">
 
                 <div class="form-group">
                     <label>CODENAME</label>
@@ -99,7 +540,7 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>RARITY</label>
+                        <label>RARITY (★)</label>
                         <input type="number" id="input-star" min="1" max="6" value="6">
                     </div>
                     <div class="form-group">
@@ -124,8 +565,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>IMAGE URL</label>
-                    <input type="text" id="input-image" placeholder="images/ファイル名.jpg">
+                    <label>IMAGE URL (images/名前.jpg 等)</label>
+                    <input type="text" id="input-image">
                 </div>
 
                 <div class="form-group">
@@ -146,7 +587,265 @@
         </div>
     </section>
 
-    <!-- JavaScriptロジックの読み込み -->
-    <script src="js/app.js"></script>
+    <script>
+        /* =========================================
+           JavaScriptロジック (データ・機能)
+           ========================================= */
+
+        // 1. 初期データ定義 (提示されたデータをここに格納)
+        const initialData = [
+            { 
+              star: 6, job: "前衛", codename: "アイリーニ", job2: "剣豪", birth: "1月3日", CV: "釘宮理恵", 
+              personal_history: "アイリーニは、イベリアの大審問官ダリオの弟子であり、以前まで自身も審問官の職に就いていた。彼女はイベリアの歴史、法律、人文、地理などに関して豊かな知識を有している。「狂人号」事件以降、アイリーニは審問官の職を辞して、ケルシー直々の推薦により、現在は裁判所のトランスポーターとしてロドスとの協力協定を結び、海からの脅威に備えている。", 
+              my_comment: "私が語る一番の魅力は声が大変可愛らしいということです。厳格な審問官というイメージとはかけ離れた可愛い声に骨抜きになり、このゲームを始めました。戦闘面でも敵の防御力を一定数無視して攻撃してくれるのでどこにでも起用できますし、スキル3の高火力は使っていて楽しいです。（見た目について触れるならば頭上に黒いツノが二つついています。あと白い靴下は私を救う）" 
+            },
+            { 
+              star: 6, job: "狙撃", codename: "ウィシャデル", job2: "投擲手", birth: "本人は忘れたと主張", CV: "竹達彩奈", 
+              personal_history: "サルカズ傭兵のリーダーであるＷは、正式にウィシャデルと改名した。ロンディニウム戦争中、ロドスロンディニウム特別行動隊と密に協力し、幾度となく軍事委員会の作戦を阻止した。", 
+              my_comment: "全キャラの中で最強と言ってもいい環境破壊性能をしています。ウィシャデルがいるだけで大抵のステージはクリアでき、圧倒的な火力と隠密性能でもはやチートです。また、アークナイツの中でも昔からいるキャラクターで愛着が湧いています。また、服装が短パンとそんな装備で大丈夫かと聴きたくなるような姿です。魅惑的な足が見れるのでいいんですが..." 
+            },
+            { 
+              star: 6, job: "特殊", codename: "血掟テキサス", job2: "執行者", birth: "6月1日", CV: "田所あずさ", 
+              personal_history: "ペンギン急便の社員であり、テキサスファミリー最後の生き残り。単独での作戦能力に秀でている。", 
+              my_comment: "元々星5キャラクターだったテキサスが星6となって再登場しました。執行者という職分で、短期間の出陣、高速な再配置を繰り返し、スタン・範囲殲滅・対空も可能な大変汎用性が高いキャラクター。困ったときはテキサスをおいておくだけで陣形の立て直しができるチートキャラクターです。二つの剣で戦う姿がかっこいい！" 
+            },
+            { 
+              star: 6, job: "前衛", codename: "ウルピアヌス", job2: "重剣士", birth: "4月13日", CV: "小野大輔", 
+              personal_history: "エーギル人であるウルピアヌスは、エーギル技術アカデミーの元執政官であり、科学研究プロジェクト・アビサルハンター計画の責任者であり、またエーギルの軍事団体「アビサルハンター」の作戦指揮官の一人である。彼がいつ、どこから陸に上がったのかは不明。現在は、ロドスの海関連の事務対応時に支援を行っている。本人と関連人員による確認後、ウルピアヌスのすべての資料は権限の高いデータベースに移行された。", 
+              my_comment: "圧倒的ステータスで敵をコテンパンにします。紙装甲の馬鹿火力です。防御力は他キャラと比べて最低値の0であり打たれ弱いかと思いきやHPが最高値の6000越えでさらにスキル発動で倍ぐらいまで伸びます。また、ダメージを受けるたびHPを回復（？！）するので大抵の局面で戦うことができます。" 
+            },
+            { 
+              star: 6, job: "前衛", codename: "エンテレケイア", job2: "鎌撃士", birth: "12月31日", CV: "長谷川育美", 
+              personal_history: "カズデルのスパイ組織「ローズ河畔」のメンバー。かつてはバベルに情報提供をしていた。ロンディニウム戦争中、エンテレケイアは自主的にロドスに連絡を取り、現在は訪問者として本艦に滞在している｡エンテレケイアはロドスと正式な契約を結んでいないため、彼女とロドスの協力はすべて個人間の依頼によるものと見なされる点に留意されたし。", 
+              my_comment: "アークナイツでも珍しい鎌を扱うオペレーターです。鎌撃士は味方からのHP回復を受けず、敵に攻撃することで回復します。このキャラクターの魅力は魅力的なセリフと太ももです。きちんとこのコメントを読んでいたらお分かりかと思いますが私の性癖は足なのでエンテレケイアの足はとても刺さりました。また、声もいいので最高です。好きなキャラを使っている時がいちばん楽しい！" 
+            },
+            { 
+              star: 5, job: "前衛", codename: "ラ・プルマ", job2: "鎌撃士", birth: "8月29日", CV: "高野麻里佳", 
+              personal_history: "トゥルーボリバリアン」に所属した某中尉の娘。父親の死後、その戦友だったパンチョに引き取られ、養女として育てられた。その後共に各地を転々とし、やがてドッソレスにたどり着いた。ドッソレス事件後、テキーラと共にロドスにやってきた。特殊な身分であるために会議と審査を経て、ロドスへの加入が許可された。", 
+              my_comment: "鎌を扱うオペレーター２人目です。また、今回の紹介において初の星5となります。やっぱりソシャゲの特徴で星が多いい方が強いため、あまり星5は使用しないのですが、ラ・プルマだけは違います。スキル2の高速鎌攻撃がとても楽しい。敵がミンチになります。あと可愛い（大事）" 
+            }
+        ];
+
+        // データのグローバル変数
+        let aknaiData = [];
+
+        // 2. ページ読み込み時に実行
+        window.onload = function() {
+            const savedData = localStorage.getItem('aknaiData');
+            
+            if (savedData) {
+                // 保存されたデータがある場合
+                aknaiData = JSON.parse(savedData);
+                // もし保存データが空配列になってしまっていたら初期データで復旧させる
+                if (aknaiData.length === 0 && confirm("データが空のようです。初期データを読み込みますか？")) {
+                    aknaiData = JSON.parse(JSON.stringify(initialData));
+                    // 画像パスの自動補完
+                    addDefaultImagePaths();
+                    saveData();
+                }
+            } else {
+                // 初めての場合：初期データを使用
+                aknaiData = JSON.parse(JSON.stringify(initialData));
+                // 画像パスの自動補完
+                addDefaultImagePaths();
+                saveData(); // 保存しておく
+            }
+            
+            renderList();
+        };
+
+        // 画像パスがないデータにデフォルトパスを追加する関数
+        function addDefaultImagePaths() {
+            aknaiData.forEach(char => {
+                if (!char.image) {
+                    // codenameを使ってパスを推測 (例: images/アイリーニ.jpg)
+                    char.image = `images/${char.codename}.jpg`;
+                }
+            });
+        }
+
+        // データをLocalStorageに保存
+        function saveData() {
+            localStorage.setItem('aknaiData', JSON.stringify(aknaiData));
+            renderList();
+        }
+
+        // 3. 画面切り替え関数
+        function showListView() {
+            document.getElementById('list-view').style.display = 'block';
+            document.getElementById('detail-view').style.display = 'none';
+            document.getElementById('form-view').style.display = 'none';
+            window.scrollTo(0, 0);
+        }
+
+        function showDetailView(index) {
+            document.getElementById('list-view').style.display = 'none';
+            document.getElementById('detail-view').style.display = 'block';
+            document.getElementById('form-view').style.display = 'none';
+
+            const data = aknaiData[index];
+
+            document.getElementById('detail-codename').textContent = data.codename;
+            
+            const imgEl = document.getElementById('detail-image');
+            imgEl.src = data.image;
+            imgEl.alt = data.codename;
+            // 画像表示をリセット（非表示になっていた場合に備えて）
+            imgEl.style.display = 'block';
+            if(imgEl.nextElementSibling) imgEl.nextElementSibling.style.display = 'none';
+
+            document.getElementById('detail-star').textContent = '★' + data.star;
+            document.getElementById('detail-job').textContent = data.job;
+            document.getElementById('detail-job2').textContent = data.job2;
+            document.getElementById('detail-birth').textContent = data.birth;
+            document.getElementById('detail-cv').textContent = data.CV;
+            document.getElementById('detail-history').textContent = data.personal_history;
+            document.getElementById('detail-comment').textContent = data.my_comment;
+
+            const editBtn = document.getElementById('edit-btn-link');
+            editBtn.onclick = function() {
+                showEditForm(index);
+            };
+            window.scrollTo(0, 0);
+        }
+
+        function showCreateForm() {
+            document.getElementById('list-view').style.display = 'none';
+            document.getElementById('detail-view').style.display = 'none';
+            document.getElementById('form-view').style.display = 'block';
+
+            document.getElementById('operator-form').reset();
+            document.getElementById('form-mode').value = 'create';
+            document.getElementById('form-header-title').textContent = 'OPERATOR REGISTRATION';
+            document.getElementById('form-title').textContent = '新規登録';
+            document.getElementById('form-submit-btn').textContent = 'REGISTER';
+            window.scrollTo(0, 0);
+        }
+
+        function showEditForm(index) {
+            document.getElementById('list-view').style.display = 'none';
+            document.getElementById('detail-view').style.display = 'none';
+            document.getElementById('form-view').style.display = 'block';
+
+            const data = aknaiData[index];
+            document.getElementById('form-mode').value = 'edit';
+            document.getElementById('form-id').value = index;
+            
+            document.getElementById('input-codename').value = data.codename;
+            document.getElementById('input-star').value = data.star;
+            document.getElementById('input-job').value = data.job;
+            document.getElementById('input-job2').value = data.job2;
+            document.getElementById('input-birth').value = data.birth;
+            document.getElementById('input-cv').value = data.CV;
+            document.getElementById('input-image').value = data.image;
+            document.getElementById('input-history').value = data.personal_history;
+            document.getElementById('input-comment').value = data.my_comment;
+
+            document.getElementById('form-header-title').textContent = 'OPERATOR UPDATE';
+            document.getElementById('form-title').textContent = 'データ編集: ' + data.codename;
+            document.getElementById('form-submit-btn').textContent = 'UPDATE';
+            window.scrollTo(0, 0);
+        }
+
+        function cancelForm() {
+            const mode = document.getElementById('form-mode').value;
+            if (mode === 'edit') {
+                const id = document.getElementById('form-id').value;
+                showDetailView(id);
+            } else {
+                showListView();
+            }
+        }
+
+        // 4. 一覧描画
+        function renderList() {
+            const listContainer = document.getElementById('character-list');
+            listContainer.innerHTML = '';
+
+            aknaiData.forEach((char, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'character-card-wrapper';
+
+                const link = document.createElement('a');
+                link.href = '#';
+                link.className = 'card-link';
+                link.onclick = function(e) {
+                    e.preventDefault();
+                    showDetailView(index);
+                };
+
+                // 画像読み込みエラー時の処理を含むHTML生成
+                link.innerHTML = `
+                    <div class="character-card">
+                        <div class="card-image-wrapper">
+                            <div class="rarity-badge">★${char.star}</div>
+                            <img src="${char.image}" alt="${char.codename}" class="card-image" 
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <div class="no-image-text" style="display:none;">NO IMAGE</div>
+                        </div>
+                        <div class="card-info">
+                            <h2 class="card-name">${char.codename}</h2>
+                            <div class="spec-tag">${char.job}</div>
+                        </div>
+                    </div>
+                `;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '削除';
+                deleteBtn.onclick = function() {
+                    if(confirm(char.codename + ' を本当に削除しますか？')) {
+                        deleteCharacter(index);
+                    }
+                };
+
+                wrapper.appendChild(link);
+                wrapper.appendChild(deleteBtn);
+                listContainer.appendChild(wrapper);
+            });
+        }
+
+        // 5. フォーム送信処理 (追加・更新)
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const mode = document.getElementById('form-mode').value;
+            const codename = document.getElementById('input-codename').value;
+            
+            // 画像パスの入力がなければ自動補完
+            let imagePath = document.getElementById('input-image').value;
+            if(!imagePath) {
+                imagePath = `images/${codename}.jpg`;
+            }
+
+            const newData = {
+                codename: codename,
+                star: document.getElementById('input-star').value,
+                job: document.getElementById('input-job').value,
+                job2: document.getElementById('input-job2').value,
+                birth: document.getElementById('input-birth').value,
+                CV: document.getElementById('input-cv').value,
+                image: imagePath,
+                personal_history: document.getElementById('input-history').value,
+                my_comment: document.getElementById('input-comment').value
+            };
+
+            if (mode === 'create') {
+                aknaiData.push(newData);
+                saveData();
+                showListView();
+            } else {
+                const id = document.getElementById('form-id').value;
+                aknaiData[id] = newData;
+                saveData();
+                showDetailView(id);
+            }
+        }
+
+        // 6. 削除処理
+        function deleteCharacter(index) {
+            aknaiData.splice(index, 1);
+            saveData();
+        }
+    </script>
 </body>
 </html>
