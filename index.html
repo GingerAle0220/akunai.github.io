@@ -450,14 +450,16 @@
         }
 
         /* スマホ対応 */
-        @media (max-width: 1500px) {
-            .detail-card { flex-direction: column; }
-            .left-column, .right-column { width: 100%; border: none; }
-            .form-row { flex-direction: column; gap: 0; }
-        }
+        @media (max-width: 600px) {
+    .left-column,
+    .right-column {
+        padding: 20px;
+    }
+  }
+
         #detail-view {
                  overflow-x: auto;
-                 -webkit-overflow-scrolling: touch; /* iOSでなめらかに */
+                 -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
